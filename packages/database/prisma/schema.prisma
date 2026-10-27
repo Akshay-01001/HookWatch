@@ -1,0 +1,111 @@
+// HookWatch - Webhook Monitoring SaaS
+// This is the foundation schema. It is extensible for:
+// - Provider account connections and encrypted credentials
+// - Team membership and RBAC
+// - Provider-specific delivery identifiers
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum WebhookEventStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  RETRYING
+}
+
+enum DeliveryAttemptStatus {
+  SUCCESS
+  FAILED
+  TIMEOUT
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  projects Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoints WebhookEndpoint[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model WebhookEndpoint {
+  id        String   @id @default(cuid())
+  url       String
+  provider  String?
+  isActive  Boolean  @default(true) @map("is_active")
+  projectId String   @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  events  WebhookEvent[]
+
+  @@index([projectId])
+  @@map("webhook_endpoints")
+}
+
+model WebhookEvent {
+  id         String             @id @default(cuid())
+  eventType  String             @map("event_type")
+  provider   String?
+  headers    Json?
+  payload    Json
+  status     WebhookEventStatus @default(PENDING)
+  receivedAt DateTime           @default(now()) @map("received_at")
+  endpointId String             @map("endpoint_id")
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  endpoint WebhookEndpoint  @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  attempts DeliveryAttempt[]
+
+  @@index([endpointId])
+  @@index([status])
+  @@index([receivedAt])
+  @@map("webhook_events")
+}
+
+model DeliveryAttempt {
+  id            String               @id @default(cuid())
+  attemptNumber Int                  @map("attempt_number")
+  status        DeliveryAttemptStatus
+  responseCode  Int?                 @map("response_code")
+  responseBody  String?              @map("response_body")
+  errorMessage  String?              @map("error_message")
+  durationMs    Int?                 @map("duration_ms")
+  eventId       String               @map("event_id")
+  createdAt     DateTime             @default(now()) @map("created_at")
+
+  event WebhookEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("delivery_attempts")
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@hook-watch/database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "dotenv": "^16.6.1",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
+    "prisma": "^7.10.1",
+    "typescript": "^5.8.0"
+  }
+}

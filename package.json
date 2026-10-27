@@ -1,0 +1,28 @@
+{
+  "name": "hookwatch",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/database",
+    "packages/queue",
+    "apps/web",
+    "apps/worker"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @hook-watch/web",
+    "dev:worker": "npm run dev -w @hook-watch/worker",
+    "build:packages": "npm run build -w @hook-watch/database && npm run build -w @hook-watch/queue",
+    "build:web": "npm run build -w @hook-watch/web",
+    "build:worker": "npm run build -w @hook-watch/worker",
+    "build": "npm run build:packages && npm run build:web && npm run build:worker",
+    "start:web": "npm run start -w @hook-watch/web",
+    "start:worker": "npm run start -w @hook-watch/worker",
+    "db:generate": "npm run db:generate -w @hook-watch/database",
+    "db:migrate:dev": "npm run db:migrate:dev -w @hook-watch/database",
+    "db:migrate:deploy": "npm run db:migrate:deploy -w @hook-watch/database",
+    "db:studio": "npm run db:studio -w @hook-watch/database",
+    "typecheck": "npm run typecheck -w @hook-watch/database && npm run typecheck -w @hook-watch/queue && npm run typecheck -w @hook-watch/web && npm run typecheck -w @hook-watch/worker",
+    "typecheck:web": "npm run typecheck -w @hook-watch/web",
+    "typecheck:worker": "npm run typecheck -w @hook-watch/worker"
+  }
+}
